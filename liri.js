@@ -53,4 +53,23 @@ if (command === "concert-this") {
 
 }
 
+if (command === "movie-this") {
+
+    var movie = process.argv.slice(3).join(" ");
+
+    axios.get("http://www.omdbapi.com/?t=" + movie + "&y=&plot=short&apikey=trilogy")
+    .then(function(response){
+
+        console.log(`
+        Title: ${response.data.Title}
+        Year of Release: ${response.data.Year}
+        IMBD Rating: ${response.data.Ratings[0].Value}
+        Rotten Tomatoes Rating: ${response.data.Ratings[1].Value}
+        Country of Production: ${response.data.Country}
+        Language: ${response.data.Language}
+        Plot: ${response.data.Plot}
+        Actors: ${response.data.Actors}`)
+    })
+}
+
 
