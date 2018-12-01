@@ -6,45 +6,48 @@ var keys = require("./keys.js");
 var fs = require("fs");
 var spotify = new Spotify(keys.spotify);
 var command = process.argv[2];
+var value = process.argv.slice(3).join(" ");
 
 function spotifyMusic() {
-    var trackName = process.argv.slice(3).join(" ");
-    spotify.search({ type: 'track', query: trackName }, function (err, data) {
-        if (err) {
-            return console.log('Error occurred: ' + err);
-        }
 
+    if (process.argv.length < 4) {
+        spotify.search({ query: "ace+of+base", type: 'track', year: 1993 }, function (err, data) {
+            if (err) {
+                return console.log('Error occurred: ' + err);
+            }
 
-        console.log(`
+            console.log(`
+            Artist: ${data.tracks.items[0].album.artists[0].name}
+            Song Title: ${data.tracks.items[0].name}
+            Preview Link: ${data.tracks.items[0].preview_url}
+            Album: ${data.tracks.items[0].album.name}`);
+
+        });
+    } else {
+
+        spotify.search({ type: 'track', query: value }, function (err, data) {
+            if (err) {
+                return console.log('Error occurred: ' + err);
+            }
+
+            console.log(`
         Artist: ${data.tracks.items[0].album.artists[0].name}
         Song Title: ${data.tracks.items[0].name}
         Preview Link: ${data.tracks.items[0].preview_url}
         Album: ${data.tracks.items[0].album.name}`);
 
-    });
+        });
+
+    }
 }
 
-function spotifyDefault() {
 
-    spotify.search({ query: "the sign", type: 'track', year: 1993 }, function (err, data) {
-        if (err) {
-            return console.log('Error occurred: ' + err);
-        }
-
-        console.log(`
-        Artist: ${data.tracks.items[9].album.artists[0].name}
-        Song Title: ${data.tracks.items[9].name}
-        Preview Link: ${data.tracks.items[9].preview_url}
-        Album: ${data.tracks.items[9].album.name}`);
-
-    });
-}
 
 function bandsInTown() {
 
-    var artist = process.argv.slice(3).join(" ");
 
-    axios.get("https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp")
+
+    axios.get("https://rest.bandsintown.com/artists/" + value + "/events?app_id=codingbootcamp")
         .then(function (response) {
 
             for (var i = 0; i < response.data.length; i++) {
@@ -68,12 +71,30 @@ function bandsInTown() {
 
 function OMDB() {
 
-    var movie = process.argv.slice(3).join(" ");
+    if (process.argv.length < 4) {
 
-    axios.get("http://www.omdbapi.com/?t=" + movie + "&y=&plot=short&apikey=trilogy")
-        .then(function (response) {
+        axios.get("http://www.omdbapi.com/?t=mr+nobody&y=&plot=short&apikey=trilogy")
+            .then(function (response) {
 
-            console.log(`
+                console.log(`
+                Title: ${response.data.Title}
+                Year of Release: ${response.data.Year}
+                IMBD Rating: ${response.data.Ratings[0].Value}
+                Rotten Tomatoes Rating: ${response.data.Ratings[1].Value}
+                Country of Production: ${response.data.Country}
+                Language: ${response.data.Language}
+                Plot: ${response.data.Plot}
+                Actors: ${response.data.Actors}`)
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    } else {
+
+        axios.get("http://www.omdbapi.com/?t=" + value + "&y=&plot=short&apikey=trilogy")
+            .then(function (response) {
+
+                console.log(`
         Title: ${response.data.Title}
         Year of Release: ${response.data.Year}
         IMBD Rating: ${response.data.Ratings[0].Value}
@@ -82,31 +103,13 @@ function OMDB() {
         Language: ${response.data.Language}
         Plot: ${response.data.Plot}
         Actors: ${response.data.Actors}`)
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
 }
 
-function OMDBDefault() {
-
-    axios.get("http://www.omdbapi.com/?t=mr+nobody&y=&plot=short&apikey=trilogy")
-        .then(function (response) {
-
-            console.log(`
-        Title: ${response.data.Title}
-        Year of Release: ${response.data.Year}
-        IMBD Rating: ${response.data.Ratings[0].Value}
-        Rotten Tomatoes Rating: ${response.data.Ratings[1].Value}
-        Country of Production: ${response.data.Country}
-        Language: ${response.data.Language}
-        Plot: ${response.data.Plot}
-        Actors: ${response.data.Actors}`)
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
-}
 
 function doIt() {
 
@@ -116,55 +119,36 @@ function doIt() {
             return console.log(err);
         }
 
-        console.log(data);
+        var text = data.split(",")
+        // console.log(text)
+        liri(text);
     })
 
 }
 
 
-if (command === "spotify-this-song") {
-
-    if (process.argv.length < 4) {
-        console.log("\nYou didn't pick a song, so enjoy the one I've picked.\n")
-        
-        spotifyDefault()
-    } else {
-        spotifyMusic();
-    }
+//make if else statements into switch case, then plug switch function into doit function
 
 
-}
 
-if (command === "concert-this") {
+var liri = function (command) {
 
-    bandsInTown()
-
-}
-
-if (command === "movie-this") {
-    
-    if (process.argv.length < 4) {
-        console.log("\nYou didn't specify a movie, so here is one to check out.\n")
-        
-        OMDBDefault()
-
-    } else {
-        OMDB();
+    switch (command) {
+        case "spotify-this-song":
+            spotifyMusic();
+            break;
+        case "concert-this":
+            bandsInTown()
+            break;
+        case "movie-this":
+            OMDB()
+            break;
+        case "do-what-it-says":
+            doIt()
+            break;
+        default:
+            console.log("Please enter a search term")
     }
 }
 
-if (command === "do-what-it-says") {
-
-    fs.readFile("./random.txt", "utf8", function (err, data) {
-
-        if (err) {
-            return console.log(err);
-        }
-
-        console.log(data);
-    })
-
-}
-
-
-
+liri(command);
