@@ -31,8 +31,6 @@ function spotifyDefault() {
             return console.log('Error occurred: ' + err);
         }
 
-        // console.log(data.tracks.items[9])
-
         console.log(`
         Artist: ${data.tracks.items[9].album.artists[0].name}
         Song Title: ${data.tracks.items[9].name}
@@ -40,16 +38,6 @@ function spotifyDefault() {
         Album: ${data.tracks.items[9].album.name}`);
 
     });
-
-    // spotify
-    //     .request('https://api.spotify.com/v1/search?q=the+sign%20type=track&year:1990-2000')
-    //     .then(function (data) {
-    //         console.log(data);
-    //     })
-    //     .catch(function (err) {
-    //         console.error('Error occurred: ' + err);
-    //     });
-
 }
 
 function bandsInTown() {
@@ -100,6 +88,26 @@ function OMDB() {
         });
 }
 
+function OMDBDefault() {
+
+    axios.get("http://www.omdbapi.com/?t=mr+nobody&y=&plot=short&apikey=trilogy")
+        .then(function (response) {
+
+            console.log(`
+        Title: ${response.data.Title}
+        Year of Release: ${response.data.Year}
+        IMBD Rating: ${response.data.Ratings[0].Value}
+        Rotten Tomatoes Rating: ${response.data.Ratings[1].Value}
+        Country of Production: ${response.data.Country}
+        Language: ${response.data.Language}
+        Plot: ${response.data.Plot}
+        Actors: ${response.data.Actors}`)
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+}
+
 function doIt() {
 
     fs.readFile("./random.txt", "utf8", function (err, data) {
@@ -117,6 +125,8 @@ function doIt() {
 if (command === "spotify-this-song") {
 
     if (process.argv.length < 4) {
+        console.log("\nYou didn't pick a song, so enjoy the one I've picked.\n")
+        
         spotifyDefault()
     } else {
         spotifyMusic();
@@ -127,72 +137,20 @@ if (command === "spotify-this-song") {
 
 if (command === "concert-this") {
 
-    var artist = process.argv.slice(3).join(" ");
-
-    axios.get("https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp")
-        .then(function (response) {
-
-            for (var i = 0; i < response.data.length; i++) {
-
-                var date = response.data[i].datetime
-                var convertedDate = moment(date).format("MM/DD/YYYY")
-
-
-                console.log(`
-            Venue Name: ${response.data[i].venue.name}
-            Location: ${response.data[i].venue.city}, ${response.data[i].venue.region}
-            Date of Event: ${convertedDate}`)
-                console.log(`----------------`)
-            }
-
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
+    bandsInTown()
 
 }
 
-if (command === "movie-this" && movie === "") {
-    console.log("\nHere is a movie to watch")
-    var movie = "mr+nobody";
+if (command === "movie-this") {
+    
+    if (process.argv.length < 4) {
+        console.log("\nYou didn't specify a movie, so here is one to check out.\n")
+        
+        OMDBDefault()
 
-    axios.get("http://www.omdbapi.com/?t=" + movie + "&y=&plot=short&apikey=trilogy")
-        .then(function (response) {
-
-            console.log(`
-        Title: ${response.data.Title}
-        Year of Release: ${response.data.Year}
-        IMBD Rating: ${response.data.Ratings[0].Value}
-        Rotten Tomatoes Rating: ${response.data.Ratings[1].Value}
-        Country of Production: ${response.data.Country}
-        Language: ${response.data.Language}
-        Plot: ${response.data.Plot}
-        Actors: ${response.data.Actors}`)
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
-} else if (command === "movie-this") {
-    console.log("You chose a movie")
-    var movie = process.argv.slice(3).join(" ");
-
-    axios.get("http://www.omdbapi.com/?t=" + movie + "&y=&plot=short&apikey=trilogy")
-        .then(function (response) {
-
-            console.log(`
-        Title: ${response.data.Title}
-        Year of Release: ${response.data.Year}
-        IMBD Rating: ${response.data.Ratings[0].Value}
-        Rotten Tomatoes Rating: ${response.data.Ratings[1].Value}
-        Country of Production: ${response.data.Country}
-        Language: ${response.data.Language}
-        Plot: ${response.data.Plot}
-        Actors: ${response.data.Actors}`)
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
-
+    } else {
+        OMDB();
+    }
 }
 
 if (command === "do-what-it-says") {
