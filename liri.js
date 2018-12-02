@@ -62,8 +62,6 @@ function spotifyMusic() {
 
 function bandsInTown() {
 
-
-
     axios.get("https://rest.bandsintown.com/artists/" + value + "/events?app_id=codingbootcamp")
         .then(function (response) {
 
@@ -89,8 +87,6 @@ function bandsInTown() {
                 });
 
             }
-
-            
 
         })
         .catch(function (error) {
